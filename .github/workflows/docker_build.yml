@@ -51,3 +51,47 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key for Docker context
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create Docker context
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || 22 }}
+        run: |
+          docker context create remote --docker "host=ssh://$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PORT"
+          docker context use remote
+          docker context ls
+
+      - name: Log in to GitHub Container Registry on remote
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker --context remote login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Deploy stack to remote server
+        env:
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          STACK_NAME: vite-portfolio
+        run: |
+          # Deploy the stack using the remote context
+          docker --context remote stack deploy -c docker-stack.yml --with-registry-auth $STACK_NAME
+
+          # Wait for services to be ready
+          sleep 10
+
+          # Display stack services status
+          docker --context remote stack services $STACK_NAME
