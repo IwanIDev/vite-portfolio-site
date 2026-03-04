@@ -62,19 +62,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup SSH key for Docker context
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Create Docker context
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || 22 }}
         run: |
-          docker context create remote --docker "host=ssh://$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PORT"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+          
+          # Create SSH config to use only the specific key and prevent trying multiple auth methods
+          cat > ~/.ssh/config << EOF
+          Host deploy-target
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            Port $DEPLOY_PORT
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            PubkeyAuthentication yes
+            PasswordAuthentication no
+          EOF
+          chmod 600 ~/.ssh/config
+          
+          # Test the connection
+          ssh -o BatchMode=yes deploy-target "echo 'SSH connection successful'"
+
+      - name: Create Docker context
+        run: |
+          docker context create remote --docker "host=ssh://deploy-target"
           docker context use remote
           docker context ls
 
