@@ -1,5 +1,5 @@
-# Build stage
-FROM oven/bun:latest AS build
+# Build stage - runs on native platform for speed
+FROM --platform=$BUILDPLATFORM oven/bun:latest AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-# Production stage
+# Production stage - targets the deployment platform
 FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
