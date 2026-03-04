@@ -4,7 +4,7 @@ services:
   web:
     image: ${IMAGE_NAME}
     ports:
-      - "80:80"
+      - "8280:80"
     deploy:
       replicas: 2
       update_config:
