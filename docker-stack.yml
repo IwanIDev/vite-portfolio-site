@@ -4,9 +4,12 @@ services:
   web:
     image: ${IMAGE_NAME}
     ports:
-      - "8280:80"
+      - target: 80
+        published: 8280
+        protocol: tcp
+        mode: host
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 1
         delay: 10s
