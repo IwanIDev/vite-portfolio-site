@@ -24,6 +24,56 @@ services:
     networks:
       - portfolio-network
 
+  drupal:
+    image: drupal:10-apache
+    ports:
+      - target: 80
+        published: 8281
+        protocol: tcp
+        mode: host
+    environment:
+      DRUPAL_DB_HOST: mariadb
+      DRUPAL_DB_PORT: 3306
+      DRUPAL_DB_NAME: ${DRUPAL_DB_NAME:-drupal}
+      DRUPAL_DB_USER: ${DRUPAL_DB_USER:-drupal}
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD:-drupal}
+    volumes:
+      - drupal-sites:/var/www/html/sites
+      - drupal-modules:/var/www/html/modules
+      - drupal-themes:/var/www/html/themes
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "app=drupal"
+    networks:
+      - portfolio-network
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: ${DRUPAL_DB_NAME:-drupal}
+      MARIADB_USER: ${DRUPAL_DB_USER:-drupal}
+      MARIADB_PASSWORD: ${DRUPAL_DB_PASSWORD:-drupal}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "app=drupal-db"
+    networks:
+      - portfolio-network
+
+volumes:
+  drupal-sites:
+  drupal-modules:
+  drupal-themes:
+  mariadb-data:
+
 networks:
   portfolio-network:
     driver: overlay

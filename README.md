@@ -1,75 +1,78 @@
-# React + TypeScript + Vite
+# Vite Portfolio (Headless Drupal Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is configured to consume a headless Drupal backend (JSON:API) and deploy as a Docker image served by Nginx.
 
-Currently, two official plugins are available:
+## Added Drupal libraries
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `axios` for HTTP requests
+- `drupal-jsonapi-params` for building Drupal JSON:API query parameters
 
-## React Compiler
+## Environment variables
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Create a local env file from the template:
 
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env.local
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Available variables:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_DRUPAL_BASE_URL` (required) – base Drupal URL, for example `https://cms.example.com`
+- `VITE_DRUPAL_API_PREFIX` (optional) – defaults to `/jsonapi`
+- `VITE_DRUPAL_AUTH_TOKEN` (optional) – bearer token used by the HTTP client
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Client utilities
+
+- Typed env config: `src/config/env.ts`
+- Reusable Drupal client: `src/lib/drupalClient.ts`
+
+Example usage:
+
+```ts
+import { createDrupalParams, fetchDrupalResource } from './lib/drupalClient'
+
+type NodeCollection = {
+  data: Array<{ id: string; attributes: Record<string, unknown> }>
+}
+
+const params = createDrupalParams().addPageLimit(5).addFields('node--article', ['title'])
+
+const articles = await fetchDrupalResource<NodeCollection>('/node/article', { params })
 ```
+
+## Local development
+
+```bash
+bun install
+bun run dev
+```
+
+## Docker build and run
+
+Pass Drupal variables at build time (Vite injects `VITE_*` during build):
+
+```bash
+docker build \
+  --build-arg VITE_DRUPAL_BASE_URL=https://cms.example.com \
+  --build-arg VITE_DRUPAL_API_PREFIX=/jsonapi \
+  --build-arg VITE_DRUPAL_AUTH_TOKEN=your-token \
+  -t vite-portfolio:latest .
+
+docker run --rm -p 8080:80 vite-portfolio:latest
+```
+
+## CI/CD deployment (GitHub Actions + Docker Swarm)
+
+The workflow in `.github/workflows/docker_build.yml` now forwards Drupal settings to Docker build args.
+
+Set these in your GitHub repository before deploying:
+
+- Repository variable: `VITE_DRUPAL_BASE_URL`
+- Repository variable: `VITE_DRUPAL_API_PREFIX` (optional)
+- Repository secret: `VITE_DRUPAL_AUTH_TOKEN` (optional)
+
+Existing deploy flow:
+
+1. Build and push image to GHCR on `main`
+2. SSH to the remote host
+3. `docker stack deploy -c docker-stack.yml vite-portfolio`
