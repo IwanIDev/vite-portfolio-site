@@ -20,6 +20,7 @@ services:
         - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik-public}"
         - "traefik.http.routers.vite-portfolio.rule=Host(`${PORTFOLIO_HOST:-localhost}`)"
         - "traefik.http.routers.vite-portfolio.entrypoints=${TRAEFIK_ENTRYPOINTS:-web}"
+        - "traefik.swarm.network=${TRAEFIK_NETWORK:-traefik-public}"
         - "traefik.http.services.vite-portfolio.loadbalancer.server.port=80"
     networks:
       - portfolio-network
