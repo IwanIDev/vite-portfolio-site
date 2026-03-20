@@ -74,8 +74,8 @@ function App() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Portfolio CMS Homepage</CardTitle>
-          <CardDescription>This homepage now uses shadcn/ui components and reads content from Drupal JSON:API.</CardDescription>
+          <CardTitle className="text-2xl">Iwan Ingman's Portfolio</CardTitle>
+          <CardDescription>This is my portfolio site built with React and Drupal CMS.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-3">
           <Badge variant={isLoading ? 'secondary' : error ? 'destructive' : 'default'}>
@@ -85,7 +85,7 @@ function App() {
           {resourcePath && <Badge variant="outline">Resource: {resourcePath}</Badge>}
         </CardContent>
         <CardFooter className="justify-between gap-3">
-          <span className="text-muted-foreground">Headless Drupal + Vite + shadcn/ui</span>
+          <span className="text-muted-foreground">Last updated: {new Date().toLocaleString()}</span>
           <Button type="button" onClick={() => window.location.reload()}>
             Refresh
           </Button>
