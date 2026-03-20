@@ -101,6 +101,17 @@ Set these in your GitHub repository before deploying:
 - Repository variable: `VITE_DRUPAL_BASE_URL`
 - Repository variable: `VITE_DRUPAL_API_PREFIX` (optional)
 - Repository secret: `VITE_DRUPAL_AUTH_TOKEN` (optional)
+- Repository variable: `PORTFOLIO_HOST` (domain Traefik should match, for example `portfolio.example.com`)
+- Repository variable: `TRAEFIK_NETWORK` (defaults to `traefik-public`)
+- Repository variable: `TRAEFIK_ENTRYPOINTS` (defaults to `web`, use `websecure` for TLS entrypoint)
+
+The `web` service is routed by Traefik (no direct host port publish on the app service). Your host Nginx can continue acting as the public reverse proxy by forwarding to Traefik's exposed entrypoint(s).
+
+Before first deploy, ensure the external Traefik overlay network exists in Swarm:
+
+```bash
+docker network create --driver overlay traefik-public
+```
 
 Existing deploy flow:
 

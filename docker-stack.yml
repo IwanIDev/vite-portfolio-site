@@ -3,17 +3,12 @@ version: '3.8'
 services:
   web:
     image: ${IMAGE_NAME}
-    ports:
-      - target: 80
-        published: 8280
-        protocol: tcp
-        mode: host
     deploy:
       replicas: 1
       update_config:
         parallelism: 1
         delay: 10s
-        order: start-first
+        order: stop-first
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -21,8 +16,14 @@ services:
         window: 120s
       labels:
         - "app=vite-portfolio"
+        - "traefik.enable=true"
+        - "traefik.docker.network=${TRAEFIK_NETWORK:-traefik-public}"
+        - "traefik.http.routers.vite-portfolio.rule=Host(`${PORTFOLIO_HOST:-localhost}`)"
+        - "traefik.http.routers.vite-portfolio.entrypoints=${TRAEFIK_ENTRYPOINTS:-web}"
+        - "traefik.http.services.vite-portfolio.loadbalancer.server.port=80"
     networks:
       - portfolio-network
+      - traefik-public
 
   drupal:
     image: drupal:10-apache
@@ -77,3 +78,6 @@ volumes:
 networks:
   portfolio-network:
     driver: overlay
+  traefik-public:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik-public}
