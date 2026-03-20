@@ -60,7 +60,6 @@ jobs:
           build-args: |
             VITE_DRUPAL_BASE_URL=${{ vars.VITE_DRUPAL_BASE_URL }}
             VITE_DRUPAL_API_PREFIX=${{ vars.VITE_DRUPAL_API_PREFIX }}
-            VITE_DRUPAL_AUTH_TOKEN=${{ secrets.VITE_DRUPAL_AUTH_TOKEN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -117,6 +116,11 @@ jobs:
         env:
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           STACK_NAME: vite-portfolio
+          PORTFOLIO_HOST: ${{ vars.PORTFOLIO_HOST }}
+          TRAEFIK_NETWORK: ${{ vars.TRAEFIK_NETWORK }}
+          TRAEFIK_ENTRYPOINTS: ${{ vars.TRAEFIK_ENTRYPOINTS }}
+          DRUPAL_DB_PASSWORD: ${{ secrets.DRUPAL_DB_PASSWORD }}
+          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_ROOT_PASSWORD }}
         run: |
           # Deploy the stack using the remote context
           docker --context remote stack deploy -c docker-stack.yml --with-registry-auth $STACK_NAME

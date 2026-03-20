@@ -100,10 +100,13 @@ Set these in your GitHub repository before deploying:
 
 - Repository variable: `VITE_DRUPAL_BASE_URL`
 - Repository variable: `VITE_DRUPAL_API_PREFIX` (optional)
-- Repository secret: `VITE_DRUPAL_AUTH_TOKEN` (optional)
 - Repository variable: `PORTFOLIO_HOST` (domain Traefik should match, for example `portfolio.example.com`)
 - Repository variable: `TRAEFIK_NETWORK` (defaults to `traefik-public`)
 - Repository variable: `TRAEFIK_ENTRYPOINTS` (defaults to `web`, use `websecure` for TLS entrypoint)
+- Repository secret: `DRUPAL_DB_PASSWORD`
+- Repository secret: `MARIADB_ROOT_PASSWORD`
+
+Note: `VITE_*` values are embedded into frontend build output. Do not place private credentials in `VITE_*` variables.
 
 The `web` service is routed by Traefik (no direct host port publish on the app service). Your host Nginx can continue acting as the public reverse proxy by forwarding to Traefik's exposed entrypoint(s).
 
