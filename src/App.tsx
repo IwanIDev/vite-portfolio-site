@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { fetchDrupalResource } from './lib/drupalClient'
-import './App.css'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 type DrupalArticle = {
   id: string
@@ -56,34 +60,76 @@ function App() {
     void loadArticles()
   }, [])
 
-  return (
-    <main>
-      <h1 className="mb-4 text-2xl font-bold">Articles</h1>
-      {!isLoading && !error && resourcePath && <p>Using resource: {resourcePath}</p>}
+  const articleCount = articles.length
 
-      {isLoading && <p>Loading articles…</p>}
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return 'Unknown date'
+    }
+
+    return new Date(value).toLocaleString()
+  }
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Portfolio CMS Homepage</CardTitle>
+          <CardDescription>This homepage now uses shadcn/ui components and reads content from Drupal JSON:API.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <Badge variant={isLoading ? 'secondary' : error ? 'destructive' : 'default'}>
+            {isLoading ? 'Loading' : error ? 'Error' : 'Connected'}
+          </Badge>
+          <Badge variant="outline">Articles: {articleCount}</Badge>
+          {resourcePath && <Badge variant="outline">Resource: {resourcePath}</Badge>}
+        </CardContent>
+        <CardFooter className="justify-between gap-3">
+          <span className="text-muted-foreground">Headless Drupal + Vite + shadcn/ui</span>
+          <Button type="button" onClick={() => window.location.reload()}>
+            Refresh
+          </Button>
+        </CardFooter>
+      </Card>
 
       {error && (
-        <p role="alert" className="text-red-600">
-          Could not fetch articles: {error}
-        </p>
+        <Alert variant="destructive">
+          <AlertTitle>Could not fetch articles</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {!isLoading && !error && articles.length === 0 && (
-        <p>Connected to Drupal, but no articles were returned.</p>
+      {!isLoading && !error && articleCount === 0 && (
+        <Alert>
+          <AlertTitle>No articles found</AlertTitle>
+          <AlertDescription>Connected to Drupal successfully, but this resource currently has no content.</AlertDescription>
+        </Alert>
       )}
 
-      {!isLoading && !error && articles.length > 0 && (
-        <ul style={{ textAlign: 'left' }}>
+      {!isLoading && !error && articleCount > 0 && (
+        <section className="grid gap-4 md:grid-cols-2">
           {articles.map((article) => (
-            <li key={article.id}>
-              <strong>{article.attributes?.title ?? '(Untitled)'}</strong>
-              <div>ID: {article.id}</div>
-              <div>Status: {article.attributes?.status ? 'Published' : 'Unpublished'}</div>
-              {article.attributes?.created && <div>Created: {new Date(article.attributes.created).toLocaleString()}</div>}
-            </li>
+            <Card key={article.id} size="sm">
+              <CardHeader className="gap-2">
+                <CardTitle>{article.attributes?.title ?? '(Untitled)'}</CardTitle>
+                <CardDescription>{article.id}</CardDescription>
+              </CardHeader>
+              <Separator />
+              <CardContent className="space-y-2 pt-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant={article.attributes?.status ? 'default' : 'secondary'}>
+                    {article.attributes?.status ? 'Published' : 'Unpublished'}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Created</span>
+                  <span>{formatDate(article.attributes?.created)}</span>
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </section>
       )}
     </main>
   )
