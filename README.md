@@ -21,6 +21,11 @@ Available variables:
 - `VITE_DRUPAL_API_PREFIX` (optional) – defaults to `/jsonapi`
 - `VITE_DRUPAL_AUTH_TOKEN` (optional) – bearer token used by the HTTP client
 
+For local development with the included Drupal stack (CORS-safe via Vite proxy), use:
+
+- `VITE_DRUPAL_BASE_URL=http://localhost:5173`
+- `VITE_DRUPAL_API_PREFIX=/drupal-api/jsonapi`
+
 ## Client utilities
 
 - Typed env config: `src/config/env.ts`
@@ -46,6 +51,32 @@ const articles = await fetchDrupalResource<NodeCollection>('/node/article', { pa
 bun install
 bun run dev
 ```
+
+## Local Drupal server (for testing)
+
+Start local Drupal + MariaDB:
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+```
+
+Then open Drupal installer:
+
+- `http://localhost:8081`
+
+After installation:
+
+1. Enable JSON:API module in Drupal (if not already enabled).
+2. Create at least one Article content item.
+3. Keep frontend env values on proxy mode (`http://localhost:5173` + `/drupal-api/jsonapi`).
+
+Run frontend:
+
+```bash
+bun run dev
+```
+
+Your React app requests `/drupal-api/...` on the Vite dev server, and Vite proxies to Drupal at `http://localhost:8081`, avoiding browser CORS issues.
 
 ## Docker build and run
 
