@@ -1,0 +1,31 @@
+import { Badge } from "./ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Separator } from "./ui/separator";
+
+function ArticleCard({ id, title, status, dateCreated }: { id: string; title: string; status: boolean; dateCreated: Date; }) {
+
+  return (
+    <div className="article-card">
+      <Card key={id} size="sm">
+        <CardHeader className="gap-2">
+          <CardTitle>{title ?? '(Untitled)'}</CardTitle>
+          <CardDescription>{id}</CardDescription>
+        </CardHeader>
+        <Separator />
+        <CardContent className="space-y-2 pt-3">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Status</span>
+            <Badge variant={status ? 'default' : 'secondary'}>
+              {status ? 'Published' : 'Unpublished'}
+            </Badge>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Created</span>
+            <span>{dateCreated.toString()}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+export default ArticleCard;

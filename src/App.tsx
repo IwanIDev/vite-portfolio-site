@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import ArticleCard from '@/components/ArticleCard'
 
 type DrupalArticle = {
   id: string
@@ -118,25 +119,12 @@ function App() {
       {!isLoading && !error && articleCount > 0 && (
         <section className="grid gap-4 md:grid-cols-2">
           {articles.map((article) => (
-            <Card key={article.id} size="sm">
-              <CardHeader className="gap-2">
-                <CardTitle>{article.attributes?.title ?? '(Untitled)'}</CardTitle>
-                <CardDescription>{article.id}</CardDescription>
-              </CardHeader>
-              <Separator />
-              <CardContent className="space-y-2 pt-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Status</span>
-                  <Badge variant={article.attributes?.status ? 'default' : 'secondary'}>
-                    {article.attributes?.status ? 'Published' : 'Unpublished'}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Created</span>
-                  <span>{formatDate(article.attributes?.created)}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <ArticleCard 
+              id={article.id}
+              title={article.attributes?.title || 'Untitled'}
+              dateCreated={new Date(article.attributes?.created || '')}
+              status={article.attributes?.status ?? false}
+            />
           ))}
         </section>
       )}
