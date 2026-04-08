@@ -3,6 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Separator } from "./ui/separator";
 
 function ArticleCard({ id, title, status, dateCreated }: { id: string; title: string; status: boolean; dateCreated: Date; }) {
+  // Format date to DD MMM YYYY
+  const formattedDate = dateCreated.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <div className="article-card">
@@ -21,7 +27,7 @@ function ArticleCard({ id, title, status, dateCreated }: { id: string; title: st
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Created</span>
-            <span>{dateCreated.toString()}</span>
+            <span>{formattedDate}</span>
           </div>
         </CardContent>
       </Card>
