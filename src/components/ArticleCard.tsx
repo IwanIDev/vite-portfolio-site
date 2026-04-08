@@ -13,7 +13,6 @@ function ArticleCard({ id, title, status, dateCreated }: { id: string; title: st
 
   return (
     <div className="article-card">
-    // Link to article page at /articles/{id}
       <Link to={`/articles/${id}`}>
         <Card key={id} size="sm">
           <CardHeader className="gap-2">
