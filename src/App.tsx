@@ -4,7 +4,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import ArticleCard from '@/components/ArticleCard'
 
 type DrupalArticle = {
@@ -70,14 +69,6 @@ function App() {
   }, [])
 
   const articleCount = articles.length
-
-  const formatDate = (value?: string) => {
-    if (!value) {
-      return 'Unknown date'
-    }
-
-    return new Date(value).toLocaleString()
-  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-6">
