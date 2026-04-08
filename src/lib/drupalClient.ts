@@ -3,21 +3,29 @@ import type { AxiosRequestConfig } from 'axios'
 import { DrupalJsonApiParams } from 'drupal-jsonapi-params'
 import { drupalEnv, getDrupalApiBaseUrl } from '../config/env'
 
-export const drupalClient = axios.create({
-  baseURL: getDrupalApiBaseUrl(),
-  headers: {
-    Accept: 'application/vnd.api+json',
-    'Content-Type': 'application/vnd.api+json',
-  },
-})
+let drupalClientInstance: ReturnType<typeof axios.create> | null = null
 
-drupalClient.interceptors.request.use((config) => {
-  if (drupalEnv.authToken) {
-    config.headers.Authorization = `Bearer ${drupalEnv.authToken}`
+const getDrupalClient = () => {
+  if (!drupalClientInstance) {
+    const baseURL = getDrupalApiBaseUrl()
+    drupalClientInstance = axios.create({
+      baseURL,
+      headers: {
+        Accept: 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+      },
+    })
+
+    drupalClientInstance.interceptors.request.use((config) => {
+      if (drupalEnv.authToken) {
+        config.headers.Authorization = `Bearer ${drupalEnv.authToken}`
+      }
+      return config
+    })
   }
 
-  return config
-})
+  return drupalClientInstance
+}
 
 export const createDrupalParams = (): DrupalJsonApiParams => new DrupalJsonApiParams()
 
@@ -28,9 +36,10 @@ export const fetchDrupalResource = async <T>(
     config?: AxiosRequestConfig
   },
 ): Promise<T> => {
+  const client = getDrupalClient();
   const queryString = options?.params?.getQueryString()
   const url = queryString ? `${resourcePath}?${queryString}` : resourcePath
-  const { data } = await drupalClient.get<T>(url, options?.config)
+  const { data } = await client.get<T>(url, options?.config)
 
   return data
 }

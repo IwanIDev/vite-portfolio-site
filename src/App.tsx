@@ -35,7 +35,12 @@ function App() {
         setIsLoading(true)
         setError(null)
 
-        const entryPoint = await fetchDrupalResource<DrupalJsonApiEntryPoint>('')
+        let entryPoint: DrupalJsonApiEntryPoint
+        try {
+          entryPoint = await fetchDrupalResource<DrupalJsonApiEntryPoint>('')
+        } catch (error) {
+          throw new Error('Failed to load JSON:API entry point. Ensure your Drupal site is configured correctly and JSON:API is enabled.')
+        }
         const nodeResources = Object.keys(entryPoint.links).filter((key) => key.startsWith('node--'))
 
         if (nodeResources.length === 0) {
@@ -49,9 +54,12 @@ function App() {
 
         const response = await fetchDrupalResource<DrupalCollectionResponse<DrupalArticle>>(selectedPath)
         setArticles(response.data)
-      } catch (loadError) {
-        const message = loadError instanceof Error ? loadError.message : 'Failed to load articles from Drupal.'
-        setError(message)
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message)
+        } else {
+          setError('An unexpected error occurred while loading articles.')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -75,7 +83,7 @@ function App() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Iwan Ingman's Portfolio</CardTitle>
-          <CardDescription>This is my portfolio site built with React and Drupal CMS.</CardDescription>
+          <CardDescription>This is a test page for my Portfolio site using Drupal CMS.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-3">
           <Badge variant={isLoading ? 'secondary' : error ? 'destructive' : 'default'}>
@@ -91,6 +99,7 @@ function App() {
           </Button>
         </CardFooter>
       </Card>
+
 
       {error && (
         <Alert variant="destructive">
