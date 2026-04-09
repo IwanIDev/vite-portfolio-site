@@ -12,6 +12,11 @@ export type DrupalArticle = {
   }
 }
 
+export type DrupalArticleContent = {
+  body: string
+  summary?: string
+}
+
 let drupalClientInstance: ReturnType<typeof axios.create> | null = null
 
 const getDrupalClient = () => {
@@ -56,4 +61,12 @@ export const fetchDrupalResource = async <T>(
 export const loadArticle = async (id: string) : Promise<DrupalArticle> => {
   const response = await fetchDrupalResource<{ data: DrupalArticle }>(`/node/article/${id}`)
   return response.data
+}
+
+export const loadArticleContent = async (id: string) : Promise<DrupalArticleContent> => {
+  const response = await fetchDrupalResource<{ data: { attributes: { body: { value: string, summary: string } } } }>(`/node/article/${id}`)
+  return {
+    body: response.data.attributes.body.value,
+    summary: response.data.attributes.body.summary,
+  }
 }
