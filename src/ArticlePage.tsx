@@ -38,7 +38,7 @@ function ArticlePage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-6">
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Could not fetch articles</AlertTitle>
+          <AlertTitle>Could not fetch article {id}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -52,20 +52,18 @@ function ArticlePage() {
       )} 
 
       {!isLoading && article && <ArticleCard {...article} />}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Summary</CardTitle>
-        </CardHeader>
-        <Separator />
-        <CardContent>
-        {!isContentLoading && !error && summary ? (
-          <p>{summary}</p>
-        ) : (
-          <p>No summary available.</p>
-        )}
-        </CardContent>
-      </Card>
+    
+      {!isContentLoading && !error && summary && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent>
+            <p>{summary}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <section className="prose">
         {isContentLoading && (
