@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom"
 import { loadArticle, loadArticleContent, type DrupalArticle, type DrupalArticleContent } from "@/lib/drupalClient"
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card"
 import { Separator } from "@base-ui/react/separator"
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert"
 
 function ArticlePage() {
   const { id } = useParams<{ id: string }>()
@@ -33,19 +34,32 @@ function ArticlePage() {
     .finally(() => setIsContentLoading(false))
   }, [id])
 
-  if (isLoading) return <p>Loading...</p>
-  if (error || !article ) return <p>{error || 'Article not found.'}</p>
-
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-6">
-      <ArticleCard {...article} />
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Could not fetch articles</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading article...</CardTitle>
+          </CardHeader>
+        </Card>
+      )} 
+
+      {!isLoading && article && <ArticleCard {...article} />}
+
       <Card>
         <CardHeader>
           <CardTitle>Summary</CardTitle>
         </CardHeader>
         <Separator />
         <CardContent>
-        {summary ? (
+        {!isContentLoading && !error && summary ? (
           <p>{summary}</p>
         ) : (
           <p>No summary available.</p>
@@ -54,9 +68,10 @@ function ArticlePage() {
       </Card>
 
       <section className="prose">
-        {isContentLoading ? (
+        {isContentLoading && (
           <p>Loading content...</p>
-        ) : (
+        )}
+        {!isContentLoading && !error && body && (
           <article dangerouslySetInnerHTML={{ __html: body || '<p>No content available.</p>' }} />
         )}
       </section>
