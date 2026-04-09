@@ -3,6 +3,15 @@ import type { AxiosRequestConfig } from 'axios'
 import { DrupalJsonApiParams } from 'drupal-jsonapi-params'
 import { drupalEnv, getDrupalApiBaseUrl } from '../config/env'
 
+export type DrupalArticle = {
+  id: string
+  attributes?: {
+    title?: string
+    status?: boolean
+    created?: string
+  }
+}
+
 let drupalClientInstance: ReturnType<typeof axios.create> | null = null
 
 const getDrupalClient = () => {

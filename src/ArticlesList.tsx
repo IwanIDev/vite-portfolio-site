@@ -4,16 +4,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import type { DrupalArticle } from '@/lib/drupalClient'
 import ArticleCard from '@/components/ArticleCard'
-
-type DrupalArticle = {
-  id: string
-  attributes?: {
-    title?: string
-    status?: boolean
-    created?: string
-  }
-}
 
 type DrupalCollectionResponse<T> = {
   data: T[]
