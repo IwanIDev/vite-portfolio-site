@@ -6,7 +6,9 @@ import type { DrupalArticle } from '@/lib/drupalClient'
 
 function ArticleCard(article: DrupalArticle) {
   // Format date to DD MMM YYYY
-  const formattedDate = dateCreated.toLocaleDateString(undefined, {
+  const createdDate = article.attributes?.created ? new Date(article.attributes.created) : null;
+
+  const formattedDate = createdDate?.toLocaleDateString(undefined, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

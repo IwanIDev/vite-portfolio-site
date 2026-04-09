@@ -102,12 +102,7 @@ function ArticlesList() {
       {!isLoading && !error && articleCount > 0 && (
         <section className="grid gap-4 md:grid-cols-2">
           {articles.map((article) => (
-            <ArticleCard 
-              id={article.id}
-              title={article.attributes?.title || 'Untitled'}
-              dateCreated={new Date(article.attributes?.created || '')}
-              status={article.attributes?.status ?? false}
-            />
+            <ArticleCard key={article.id} {...article} />
           ))}
         </section>
       )}

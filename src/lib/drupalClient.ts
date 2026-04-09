@@ -52,3 +52,8 @@ export const fetchDrupalResource = async <T>(
 
   return data
 }
+
+export const loadArticle = async (id: string) : Promise<DrupalArticle> => {
+  const response = await fetchDrupalResource<{ data: DrupalArticle }>(`/node/article/${id}`)
+  return response.data
+}
