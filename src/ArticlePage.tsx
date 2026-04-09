@@ -1,7 +1,7 @@
 import ArticleCard from "@/components/ArticleCard"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { loadArticle, loadArticleContent, type DrupalArticle, type DrupalArticleContent } from "@/lib/drupalClient"
+import { loadArticle, loadArticleContent, type DrupalArticle } from "@/lib/drupalClient"
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card"
 import { Separator } from "@base-ui/react/separator"
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert"
@@ -11,27 +11,33 @@ function ArticlePage() {
   const [article, setArticle] = useState<DrupalArticle | null>(null)
   const [body, setBody] = useState<string | null>(null)
   const [summary, setSummary] = useState<string | null>(null)
-  const [isContentLoading, setIsContentLoading] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return;
-    
-    setIsLoading(true)
-    loadArticle(id)
-      .then(setArticle)
-      .catch(() => setError('Failed to load article. Please ensure the article exists and your Drupal site is configured correctly.'))
-      .finally(() => setIsLoading(false))
-    
-    // Load article content
-    loadArticleContent(id)
-    .then((content: DrupalArticleContent) => {
-      setBody(content.body)
-      setSummary(content.summary || null)
-    })
-    .catch(() => setError('Failed to load article content. Please ensure the article exists and your Drupal site is configured correctly.'))
-    .finally(() => setIsContentLoading(false))
+  
+    const fetchArticle = async () => {
+      setIsLoading(false);
+      setError(null);
+
+      try {
+        const [metadata, content] = await Promise.all([
+          loadArticle(id),
+          loadArticleContent(id)
+        ])
+        
+        setArticle(metadata);
+        setBody(content.body);
+        setSummary(content.summary || null);
+      } catch (err) {
+        setError('Failed to load article. Please ensure the article exists and your Drupal site is configured correctly.');
+      } finally {
+        setIsLoading(false);
+      }
+    } 
+
+    fetchArticle();
   }, [id])
 
   return (
@@ -53,7 +59,7 @@ function ArticlePage() {
 
       {!isLoading && article && <ArticleCard {...article} />}
     
-      {!isContentLoading && !error && summary && (
+      {!isLoading && !error && summary && (
         <Card>
           <CardHeader>
             <CardTitle>Summary</CardTitle>
@@ -66,10 +72,11 @@ function ArticlePage() {
       )}
 
       <section className="prose">
-        {isContentLoading && (
+        {isLoading && (
           <p>Loading content...</p>
         )}
-        {!isContentLoading && !error && body && (
+
+        {!isLoading && !error && body && (
           <article dangerouslySetInnerHTML={{ __html: body || '<p>No content available.</p>' }} />
         )}
       </section>
