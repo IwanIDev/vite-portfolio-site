@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { DrupalArticle } from '@/lib/drupalClient'
 import ArticleCard from '@/components/ArticleCard'
+import { Link } from 'react-router-dom'
 
 type DrupalCollectionResponse<T> = {
   data: T[]
@@ -102,7 +103,9 @@ function ArticlesList() {
       {!isLoading && !error && articleCount > 0 && (
         <section className="grid gap-4 md:grid-cols-2">
           {articles.map((article) => (
+          <Link to={`/articles/${article.id}`}>
             <ArticleCard key={article.id} {...article} />
+          </Link>
           ))}
         </section>
       )}

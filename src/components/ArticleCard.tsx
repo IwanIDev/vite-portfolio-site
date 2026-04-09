@@ -1,7 +1,6 @@
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
-import { Link } from 'react-router-dom';
 import type { DrupalArticle } from '@/lib/drupalClient'
 
 function ArticleCard(article: DrupalArticle) {
@@ -18,7 +17,6 @@ function ArticleCard(article: DrupalArticle) {
 
   return (
     <div className="article-card">
-      <Link to={`/articles/${id}`}>
         <Card key={id} size="sm">
           <CardHeader className="gap-2">
             <CardTitle>{attributes?.title ?? '(Untitled)'}</CardTitle>
@@ -38,7 +36,6 @@ function ArticleCard(article: DrupalArticle) {
             </div>
           </CardContent>
         </Card>
-      </Link>
     </div>
   );
 }
